@@ -64,7 +64,7 @@ double calculate_load(struct cpustat *prev, struct cpustat *cur)
     return cpu_perc;
 }
 
-int main(void)
+int checkCPULoad(void)
 {
     struct cpustat st0_0, st0_1;
     while (1)
