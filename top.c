@@ -1,7 +1,9 @@
-#include "cpuLoad.h"
+// #include "cpuLoad.h"
+#include "pstats.h"
 
 int main(int argc, char const *argv[])
 {
-  checkCPULoad();
+  // checkCPULoad();
+  generate_psdata();
   return 0;
 }
