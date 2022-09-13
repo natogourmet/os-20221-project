@@ -116,10 +116,11 @@ void get_pid_info(char *pid)
 {
   struct pstats st;
   get_stats(&st, pid);
-  get_mstats(&st, pid);
+  // get_mstats(&st, pid);
   // printf("%s\n", st.p_comm);
-  char data[1000];
-  sprintf(data, "%d\t%s\t%c\t%ul\t%ul\t%ul", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
-  printf("% s\n", data);
+  // char data[2000];
+  // sprintf(data, "%d\t%s\t%c\t%ul\t%ul\t%ul", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
+  printf("%d\t%s\t%c\t%ul\t%ul\t%ul", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
+  // printf("% s\n", data);
   return data;
 }

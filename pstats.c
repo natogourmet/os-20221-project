@@ -6,25 +6,20 @@
 
 struct pstats
 {
-  unsigned long p_id;
-  char *p_comm;
+  int p_id;
+  char p_comm[1000];
   char p_state;
   unsigned long p_size;
   unsigned long p_resident;
   unsigned long p_shared;
 };
 
-void get_stats(struct pstats *st, int pid)
+void get_stats(struct pstats *st, char *pid)
 {
-  char *filename;
-  sprintf(filename, "/proc/%d/stat", pid);
-
+  char filename[1000];
+  sprintf(filename, "/proc/%s/stat", pid);
   FILE *fp = fopen(filename, "r");
-  char cpun[255];
-  fscanf(fp, "%d %s %c", cpun, &(st->p_id), &(st->p_comm), &(st->p_state));
-  printf("%d\t%s\t%c\t\n", st->p_id, st->p_comm, st->p_state);
-  fclose(fp);
-  return;
+  fscanf(fp, "%d %s %c", &(st->p_id), (st->p_comm), &(st->p_state));
 }
 
 void get_mstats(struct pstats *st, int pid)
@@ -42,20 +37,9 @@ void get_mstats(struct pstats *st, int pid)
 int is_number(char *str)
 {
   int i;
-  if (str[0] == '1')
-  {
-    printf("unito");
-  }
-  if (str[0] == '2')
-  {
-    printf("docito");
-  }
   for (i = 0; i < strlen(str); i++)
   {
-    if (isdigit(str[i]))
-    {
-    }
-    else
+    if (!isdigit(str[i]))
     {
       return 0;
     }
@@ -63,11 +47,10 @@ int is_number(char *str)
   return 1;
 }
 
-void generate_psdata()
+int getpdata()
 {
   DIR *d;
   struct dirent *dir;
-  // dir = (struct dirent *)malloc(sizeof(struct dirent));
   d = opendir("/proc/");
   if (d)
   {
@@ -75,42 +58,35 @@ void generate_psdata()
     {
       char filename[1000];
 
-      int isNumber = 1;
-      char *dirname = dir->d_name;
-      for (int i = 0; i < strlen(dirname); i++)
+      if (!is_number(dir->d_name))
       {
-        if (isdigit(dirname[i]))
-        {
-        }
-        else
-        {
-
-          isNumber = 0;
-          break;
-        }
-      }
-      if (isNumber == 0)
         continue;
-      // printf("%s\n", dir->d_name);
-
-      int pid = atoi(dir->d_name);
-      get_pid_info(pid);
+      }
+      if (atoi(dir->d_name) < 2000 || atoi(dir->d_name) > 10000) {
+        continue;
+      }
+      sprintf(filename, "/proc/%s/stat", dir->d_name);
+      get_pid_info(dir->d_name);
     }
     closedir(d);
   }
+  return (0);
 }
 
-int get_pid_info(int pid)
+int get_pid_info(char *pid)
 {
-  struct pstats st;
-  get_stats(&st, pid);
+  struct pstats *st = (struct st*)malloc(sizeof(struct pstats));
+
+  get_stats(st, pid);
+  printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st->p_id, st->p_comm, st->p_state, st->p_size, st->p_resident, st->p_shared);
   // get_mstats(&st, pid);
+  // free(st);
   // printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
   return 0;
 }
 
-int main(void)
-{
-  printf("Hello im trying to execute myself, pls C oniichan");
-  generate_psdata();
-}
+// int main(void)
+// {
+//   printf("Hello im trying to execute myself, pls C oniichan");
+//   generate_psdata();
+// }

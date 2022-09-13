@@ -25,7 +25,7 @@ void skip_lines(FILE *fp, int numlines)
     return;
 }
 
-void get_stats(struct cpustat *st, int cpunum)
+void get_cpustats(struct cpustat *st, int cpunum)
 {
     FILE *fp = fopen("/proc/stat", "r");
     int lskip = cpunum + 1;
@@ -64,15 +64,14 @@ double calculate_load(struct cpustat *prev, struct cpustat *cur)
     return cpu_perc;
 }
 
-int checkCPULoad(void)
+int getcpuinfo(void)
 {
     struct cpustat st0_0, st0_1;
-    while (1)
-    {
-        get_stats(&st0_0, -1);
-        sleep(1);
-        get_stats(&st0_1, -1);
-        printf("CPU: %lf%%\n", calculate_load(&st0_0, &st0_1));
-    }
+    get_cpustats(&st0_0, -1);
+    sleep(1);
+    get_cpustats(&st0_1, -1);
+    system("clear");
+    printf("%%cpu usage: %lf%%\n", calculate_load(&st0_0, &st0_1));
+
     return 0;
 }

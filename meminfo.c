@@ -24,6 +24,8 @@ struct memstat
     unsigned long m_total;
     unsigned long m_free;
     unsigned long m_avlbl;
+    unsigned long m_buff;
+    unsigned long m_cache;
 };
 
 typedef struct MEMPACKED
@@ -58,26 +60,18 @@ int get_meminfo(MEM_OCCUPY *lpMemory)
     fclose(fd);
 }
 
-void get_stats(struct memstat *st, int cpunum)
-{
-    FILE *fp = fopen("/proc/meminfo", "r");
-    fscanf(fp, "%d %d %d", &(st->m_total), &(st->m_free), &(st->m_avlbl));
-    fclose(fp);
-    return;
-}
+// void get_stats(struct memstat *st, int cpunum)
+// {
+//     FILE *fp = fopen("/proc/meminfo", "r");
+//     fscanf(fp, "%d %d %d", &(st->m_total), &(st->m_free), &(st->m_avlbl));
+//     fclose(fp);
+//     return;
+// }
 
-int main(void)
+void getmeminfo(void)
 {
     struct MEMPACKED newMem;
-
-    // struct memstat st;
-    while (1)
-    {
-        sleep(1);
-        get_meminfo(&newMem);
-
-        // get_stats(&st, -1);
-        printf("MemTotal: %d MemFree: %d MemAvailable: %d\n", (newMem.MemTotal), (newMem.MemFree), (newMem.Buffers));
-    }
-    return 0;
+    get_meminfo(&newMem);
+    unsigned long usedm = newMem.MemTotal - newMem.MemFree - newMem.Buffers - newMem.Cached;
+    printf("Mem(kB):\t%d total,\t%d free,\t%d used,\t%d buff/cache\n", (newMem.MemTotal), (newMem.MemFree), usedm, (newMem.Buffers + newMem.Cached));
 }
