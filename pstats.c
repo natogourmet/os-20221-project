@@ -62,7 +62,8 @@ int getpdata()
       {
         continue;
       }
-      if (atoi(dir->d_name) < 2000 || atoi(dir->d_name) > 10000) {
+      if (atoi(dir->d_name) < 2000 || atoi(dir->d_name) > 10000)
+      {
         continue;
       }
       sprintf(filename, "/proc/%s/stat", dir->d_name);
@@ -75,10 +76,10 @@ int getpdata()
 
 int get_pid_info(char *pid)
 {
-  struct pstats *st = (struct st*)malloc(sizeof(struct pstats));
+  struct pstats *st = (struct st *)malloc(sizeof(struct pstats));
 
   get_stats(st, pid);
-  printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st->p_id, st->p_comm, st->p_state, st->p_size, st->p_resident, st->p_shared);
+  printw("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st->p_id, st->p_comm, st->p_state, st->p_size, st->p_resident, st->p_shared);
   // get_mstats(&st, pid);
   // free(st);
   // printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
