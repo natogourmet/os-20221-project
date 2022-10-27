@@ -20,6 +20,7 @@ void get_stats(struct pstats *st, char *pid)
   sprintf(filename, "/proc/%s/stat", pid);
   FILE *fp = fopen(filename, "r");
   fscanf(fp, "%d %s %c", &(st->p_id), (st->p_comm), &(st->p_state));
+  fclose(fp);
 }
 
 void get_mstats(struct pstats *st, int pid)
