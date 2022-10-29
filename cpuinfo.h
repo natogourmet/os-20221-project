@@ -31,7 +31,7 @@ void get_cpustats(struct cpustat *st, int cpunum)
   int lskip = cpunum + 1;
   skip_lines(fp, lskip);
   char cpun[255];
-  fscanf(fp, "%s %d %d %d %d %d %d %d", cpun, &(st->t_user), &(st->t_nice),
+  fscanf(fp, "%s %lu %lu %lu %lu %lu %lu %lu", cpun, &(st->t_user), &(st->t_nice),
          &(st->t_system), &(st->t_idle), &(st->t_iowait), &(st->t_irq),
          &(st->t_softirq));
   fclose(fp);
@@ -40,7 +40,7 @@ void get_cpustats(struct cpustat *st, int cpunum)
 
 void print_stats(struct cpustat *st, char *name)
 {
-  printw("%s: %d %d %d %d %d %d %d\n", name, (st->t_user), (st->t_nice),
+  printw("%s: %lu %lu %lu %lu %lu %lu %lu\n", name, (st->t_user), (st->t_nice),
          (st->t_system), (st->t_idle), (st->t_iowait), (st->t_irq),
          (st->t_softirq));
 }

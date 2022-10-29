@@ -112,6 +112,12 @@ void get_mstats(struct pstats *st, int pid)
   return;
 }
 
+void format_stats(struct pstats *st) {
+  st->p_resident = st->p_resident / 1000000;
+  st->p_shared = st->p_shared / 1000000;
+  st->p_size = st->p_size / 1000000;
+}
+
 void get_pid_info(char *pid)
 {
   struct pstats st;
@@ -120,7 +126,7 @@ void get_pid_info(char *pid)
   // printf("%s\n", st.p_comm);
   // char data[2000];
   // sprintf(data, "%d\t%s\t%c\t%ul\t%ul\t%ul", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
-  printf("%d\t%s\t%c\t%ul\t%ul\t%ul", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
+  format_stats(&st);
+  printf("%d\t%s\t%c\t%lu\t%lu\t%lu", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
   // printf("% s\n", data);
-  return data;
 }

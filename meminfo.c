@@ -73,5 +73,5 @@ void getmeminfo(void)
   struct MEMPACKED newMem;
   get_meminfo(&newMem);
   unsigned long usedm = newMem.MemTotal - newMem.MemFree - newMem.Buffers - newMem.Cached;
-  printw("Mem(kB): %d total,\t%d free,\t%d used,\t%d buff/cache\n", (newMem.MemTotal), (newMem.MemFree), usedm, (newMem.Buffers + newMem.Cached));
+  printw("Mem(kB): %lu total,\t%lu free,\t%lu used,\t%lu buff/cache\n", (newMem.MemTotal), (newMem.MemFree), usedm, (newMem.Buffers + newMem.Cached));
 }
