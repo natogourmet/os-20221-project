@@ -30,7 +30,7 @@ void get_mstats(struct pstats *st, int pid)
 
   FILE *fp = fopen(filename, "r");
   char cpun[255];
-  fscanf(fp, "%ul %ul %ul", cpun, &(st->p_size), &(st->p_resident), &(st->p_shared));
+  fscanf(fp, "%s %lu %lu %lu", cpun, &(st->p_size), &(st->p_resident), &(st->p_shared));
   fclose(fp);
   return;
 }
@@ -46,6 +46,25 @@ int is_number(char *str)
     }
   }
   return 1;
+}
+
+void format_stats(struct pstats *st) {
+  unsigned long helper = st->p_resident;
+  helper = helper / 1000000l;
+  printw("%lu\n", helper);
+}
+
+int get_pid_info(char *pid)
+{
+  struct pstats *st = (struct st *)malloc(sizeof(struct pstats));
+
+  get_stats(st, pid);
+  format_stats(st);
+  printw("%d\t%c\t%lu\t%lu\t%lu\t%s\n", st->p_id, st->p_state, st->p_size, st->p_resident, st->p_shared, st->p_comm);
+  // get_mstats(&st, pid);
+  // free(st);
+  // printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
+  return 0;
 }
 
 int getpdata()
@@ -73,18 +92,6 @@ int getpdata()
     closedir(d);
   }
   return (0);
-}
-
-int get_pid_info(char *pid)
-{
-  struct pstats *st = (struct st *)malloc(sizeof(struct pstats));
-
-  get_stats(st, pid);
-  printw("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st->p_id, st->p_comm, st->p_state, st->p_size, st->p_resident, st->p_shared);
-  // get_mstats(&st, pid);
-  // free(st);
-  // printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
-  return 0;
 }
 
 // int main(void)
