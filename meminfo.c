@@ -41,21 +41,25 @@ typedef struct MEMPACKED
 
 } MEM_OCCUPY;
 
-int get_meminfo(MEM_OCCUPY *lpMemory)
+int get_meminfo(struct memstat *mst)
 {
   FILE *fd;
   char buff[128];
   fd = fopen("/proc/meminfo", "r");
   if (fd < 0)
     return -1;
+
+  char helper[255];
   fgets(buff, sizeof(buff), fd);
-  sscanf(buff, "%s %lu ", lpMemory->name1, &lpMemory->MemTotal);
+  sscanf(buff, "%s %lu ", helper, &mst->m_total);
   fgets(buff, sizeof(buff), fd);
-  sscanf(buff, "%s %lu ", lpMemory->name2, &lpMemory->MemFree);
+  sscanf(buff, "%s %lu ", helper, &mst->m_free);
   fgets(buff, sizeof(buff), fd);
-  sscanf(buff, "%s %lu ", lpMemory->name3, &lpMemory->Buffers);
+  sscanf(buff, "%s %lu ", helper, &mst->m_avlbl);
   fgets(buff, sizeof(buff), fd);
-  sscanf(buff, "%s %lu ", lpMemory->name4, &lpMemory->Cached);
+  sscanf(buff, "%s %lu ", helper, &mst->m_buff);
+  fgets(buff, sizeof(buff), fd);
+  sscanf(buff, "%s %lu ", helper, &mst->m_cache);
 
   fclose(fd);
 }
@@ -68,10 +72,19 @@ int get_meminfo(MEM_OCCUPY *lpMemory)
 //     return;
 // }
 
+void format_mstats(struct memstat *mst) {
+  mst->m_total /= 1024;
+  mst->m_free /= 1024;
+  mst->m_avlbl /= 1024;
+  mst->m_buff /= 1024;
+  mst->m_cache /= 1024;
+}
+
 void getmeminfo(void)
 {
-  struct MEMPACKED newMem;
-  get_meminfo(&newMem);
-  unsigned long usedm = newMem.MemTotal - newMem.MemFree - newMem.Buffers - newMem.Cached;
-  printw("Mem(kB): %lu total,\t%lu free,\t%lu used,\t%lu buff/cache\n", (newMem.MemTotal), (newMem.MemFree), usedm, (newMem.Buffers + newMem.Cached));
+  struct memstat mst;
+  get_meminfo(&mst);
+  format_mstats(&mst);
+  unsigned long usedm = mst.m_avlbl - mst.m_free;
+  printw("Mem(kB): %lu total,\t%lu free,\t%lu used,\t%lu buff/cache\n", (mst.m_total), (mst.m_free), usedm, (mst.m_buff + mst.m_cache));
 }

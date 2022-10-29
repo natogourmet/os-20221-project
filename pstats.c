@@ -23,17 +23,15 @@ void get_stats(struct pstats *st, char *pid)
   fclose(fp);
 }
 
-void get_mstats(struct pstats *st, int pid)
+void get_mstats(struct pstats *st, char *pid)
 {
-  char *filename;
-  sprintf(filename, "/proc/%d/statm", pid);
-
+  char filename[1000];
+  sprintf(filename, "/proc/%s/statm", pid);
   FILE *fp = fopen(filename, "r");
-  char cpun[255];
-  fscanf(fp, "%s %lu %lu %lu", cpun, &(st->p_size), &(st->p_resident), &(st->p_shared));
+  fscanf(fp, "%lu %lu %lu", &(st->p_size), &(st->p_resident), &(st->p_shared));
   fclose(fp);
-  return;
 }
+
 
 int is_number(char *str)
 {
@@ -48,10 +46,17 @@ int is_number(char *str)
   return 1;
 }
 
-void format_stats(struct pstats *st) {
-  unsigned long helper = st->p_resident;
-  helper = helper / 1000000l;
-  printw("%lu\n", helper);
+// void format_stats(struct pstats *st) {
+//   st.
+// }
+
+void format_pstats(struct pstats *st) {
+  st->p_size *= 4;
+  // st->p_size /= 1024;
+  st->p_resident *= 4;
+  // st->p_resident /= 1024;
+  st->p_shared *= 4;
+  // st->p_shared /= 1024;
 }
 
 int get_pid_info(char *pid)
@@ -59,9 +64,9 @@ int get_pid_info(char *pid)
   struct pstats *st = (struct st *)malloc(sizeof(struct pstats));
 
   get_stats(st, pid);
-  format_stats(st);
+  get_mstats(st, pid);
+  format_pstats(st);
   printw("%d\t%c\t%lu\t%lu\t%lu\t%s\n", st->p_id, st->p_state, st->p_size, st->p_resident, st->p_shared, st->p_comm);
-  // get_mstats(&st, pid);
   // free(st);
   // printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
   return 0;
@@ -82,7 +87,7 @@ int getpdata()
       {
         continue;
       }
-      if (atoi(dir->d_name) < 2000 || atoi(dir->d_name) > 10000)
+      if (atoi(dir->d_name) < 1500 || atoi(dir->d_name) > 2000)
       {
         continue;
       }
