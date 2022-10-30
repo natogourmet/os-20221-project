@@ -3,7 +3,9 @@
 #include <dirent.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 
+#define TICKS_PER_SEC sysconf(_SC_CLK_TCK)
 struct pstats
 {
   int p_id;
@@ -12,14 +14,41 @@ struct pstats
   unsigned long p_size;
   unsigned long p_resident;
   unsigned long p_shared;
+  unsigned long utime;
+  unsigned long ktime;
+  unsigned long long start_time;
 };
+
+float get_process_elapsed_time(float pstart_time)
+{
+  float uptime;
+  FILE *fp = fopen("/proc/uptime", "r");
+  fscanf(fp, "%f", &uptime);
+  fclose(fp);
+
+  return uptime - pstart_time;
+}
+
+float calculate_cpu_usage(struct pstats *st)
+{
+  float elapsed_time = get_process_elapsed_time(st->start_time);
+  return ((st->utime + st->ktime) * 100 / elapsed_time);
+}
 
 void get_stats(struct pstats *st, char *pid)
 {
   char filename[1000];
   sprintf(filename, "/proc/%s/stat", pid);
   FILE *fp = fopen(filename, "r");
-  fscanf(fp, "%d %s %c", &(st->p_id), (st->p_comm), &(st->p_state));
+  fscanf(
+      fp,
+      "%d %s %c %*d %*d %*d %*d %*d %*u %*lu %*lu %*lu %*lu %lu %lu %*ld %*ld %*ld %*ld %*ld %*ld %llu",
+      &(st->p_id),
+      (st->p_comm),
+      &(st->p_state),
+      &(st->utime),
+      &(st->ktime),
+      &(st->start_time));
   fclose(fp);
 }
 
@@ -31,7 +60,6 @@ void get_mstats(struct pstats *st, char *pid)
   fscanf(fp, "%lu %lu %lu", &(st->p_size), &(st->p_resident), &(st->p_shared));
   fclose(fp);
 }
-
 
 int is_number(char *str)
 {
@@ -50,13 +78,17 @@ int is_number(char *str)
 //   st.
 // }
 
-void format_pstats(struct pstats *st) {
+void format_pstats(struct pstats *st)
+{
   st->p_size *= 4;
   // st->p_size /= 1024;
   st->p_resident *= 4;
   // st->p_resident /= 1024;
   st->p_shared *= 4;
   // st->p_shared /= 1024;
+  st->utime /= TICKS_PER_SEC;
+  st->ktime /= TICKS_PER_SEC;
+  st->start_time /= TICKS_PER_SEC;
 }
 
 int get_pid_info(char *pid)
@@ -66,9 +98,12 @@ int get_pid_info(char *pid)
   get_stats(st, pid);
   get_mstats(st, pid);
   format_pstats(st);
-  printw("%d\t%c\t%lu\t%lu\t%lu\t%s\n", st->p_id, st->p_state, st->p_size, st->p_resident, st->p_shared, st->p_comm);
-  // free(st);
-  // printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
+
+  float cpu_usage = calculate_cpu_usage(st);
+
+  printw("%d\t%c\t%lu\t%lu\t%lu\t%f%%\t%s\n", st->p_id, st->p_state, st->p_size, st->p_resident, st->p_shared, cpu_usage, st->p_comm);
+
+  free(st);
   return 0;
 }
 
@@ -87,10 +122,10 @@ int getpdata()
       {
         continue;
       }
-      if (atoi(dir->d_name) < 1500 || atoi(dir->d_name) > 2000)
-      {
-        continue;
-      }
+      // if (atoi(dir->d_name) < 1500 || atoi(dir->d_name) > 2000)
+      // {
+      //   continue;
+      // }
       sprintf(filename, "/proc/%s/stat", dir->d_name);
       get_pid_info(dir->d_name);
     }
