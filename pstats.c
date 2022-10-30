@@ -9,6 +9,7 @@ struct pstats
   int p_id;
   char p_comm[1000];
   char p_state;
+  unsigned long p_pages;
   unsigned long p_size;
   unsigned long p_resident;
   unsigned long p_shared;
@@ -32,7 +33,6 @@ void get_mstats(struct pstats *st, char *pid)
   fclose(fp);
 }
 
-
 int is_number(char *str)
 {
   int i;
@@ -46,11 +46,9 @@ int is_number(char *str)
   return 1;
 }
 
-// void format_stats(struct pstats *st) {
-//   st.
-// }
-
-void format_pstats(struct pstats *st) {
+void format_pstats(struct pstats *st)
+{
+  st->p_pages = st->p_size;
   st->p_size *= 4;
   // st->p_size /= 1024;
   st->p_resident *= 4;
@@ -66,7 +64,17 @@ int get_pid_info(char *pid)
   get_stats(st, pid);
   get_mstats(st, pid);
   format_pstats(st);
-  printw("%d\t%c\t%lu\t%lu\t%lu\t%s\n", st->p_id, st->p_state, st->p_size, st->p_resident, st->p_shared, st->p_comm);
+  printw(
+      "%d\t%c\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%s\n",
+      st->p_id,
+      st->p_state,
+      st->p_pages,
+      st->p_size,
+      st->p_resident / 4,
+      st->p_resident,
+      st->p_shared / 4,
+      st->p_shared,
+      st->p_comm);
   // free(st);
   // printf("%d\t%s\t%c\t%ul\t%ul\t%ul\n", st.p_id, st.p_comm, st.p_state, st.p_size, st.p_resident, st.p_shared);
   return 0;
@@ -98,9 +106,3 @@ int getpdata()
   }
   return (0);
 }
-
-// int main(void)
-// {
-//   printf("Hello im trying to execute myself, pls C oniichan");
-//   generate_psdata();
-// }
