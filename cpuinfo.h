@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
+
 unsigned sleep(unsigned sec);
+double totald = 1;
 
 struct cpustat
 {
@@ -56,12 +58,17 @@ double calculate_load(struct cpustat *prev, struct cpustat *cur)
   int total_prev = idle_prev + nidle_prev;
   int total_cur = idle_cur + nidle_cur;
 
-  double totald = (double)total_cur - (double)total_prev;
+  totald = (double)total_cur - (double)total_prev;
   double idled = (double)idle_cur - (double)idle_prev;
 
   double cpu_perc = (1000 * (totald - idled) / totald + 1) / 10;
 
   return cpu_perc;
+}
+
+float calculate_usage(unsigned long prev, unsigned long cur)
+{
+  return ((float)(cur - prev) / totald) * 100;
 }
 
 int getcpuinfo(void)
@@ -71,7 +78,16 @@ int getcpuinfo(void)
   sleep(1);
   get_cpustats(&st0_1, -1);
   // system("clear");
-  printw("%%cpu usage: %lf%%\n", calculate_load(&st0_0, &st0_1));
+
+  printw("%%CPU usage: %.2lf%%\t", calculate_load(&st0_0, &st0_1));
+  printw("user: %.2f\t", calculate_usage(st0_0.t_user, st0_1.t_user));
+  printw("user(nice): %.2f\t", calculate_usage(st0_0.t_nice, st0_1.t_nice));
+  printw("kernel: %.2f\t", calculate_usage(st0_0.t_system, st0_1.t_system));
+  printw("idle: %.2f\t", calculate_usage(st0_0.t_idle, st0_1.t_idle));
+  printw("iowait: %.2f\t", calculate_usage(st0_0.t_iowait, st0_1.t_iowait));
+  printw("irq: %.2f\t", calculate_usage(st0_0.t_irq, st0_1.t_irq));
+  printw("softirq: %.2f", calculate_usage(st0_0.t_softirq, st0_1.t_softirq));
+  printw("\n");
 
   return 0;
 }
